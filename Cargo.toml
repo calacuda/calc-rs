@@ -1,0 +1,22 @@
+[package]
+name = "lib_calc_rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "calc_rs"
+crate-type = ["cdylib", "lib"]
+
+[[bin]]
+name = "calc-rs"
+src = "src/bin/calc-rs.rs"
+
+[dependencies]
+pyo3 = { version = "0.19.2", features = ["extension-module", "eyre"] }
+# anyhow = "1.0"
+pest = "2.6"
+pest_derive = "2.6"
+lazy_static = "1.4.0"
+eyre = { version = "0.6.8", features = ["pyo3"] }
+regex = "1.9.1"
