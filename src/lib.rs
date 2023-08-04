@@ -159,9 +159,7 @@ mod tests {
             Ok(())
         }
 
-        // [(-2, Some()), (-1, Some()), (0, Some()), (1, Some()), (2, Some())]
-        // TODO: add a function that is undefined between x=-2 and x=2 to test that it returns None
-        // at that point.
+        // vec![(-2, Some()), (-1, Some()), (0, Some()), (1, Some()), (2, Some())]
         test_expr(
             "f(x) = 0.1x^3",
             vec![
@@ -192,10 +190,6 @@ mod tests {
                 (2, Some(60.0)),
             ],
         )?;
-
-        // test_expr("", [(-2, Some()), (-1, Some()), (0, Some()), (1, Some()), (2, Some())])?;
-        // test_expr("4/(10+4)^2", 0.02040816326530612)?;
-        // test_expr("4(10+4)^2", 784)?;
 
         Ok(())
     }
