@@ -1,9 +1,8 @@
 use std::fmt;
 
-pub type Num = f64;
+pub type Number = f64;
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
-// ANCHOR: operator
 pub enum Operator {
     Plus,
     Minus,
@@ -13,7 +12,6 @@ pub enum Operator {
     Negative,
     // Modulo,
 }
-// ANCHOR_END: operator
 
 impl fmt::Display for Operator {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
@@ -28,17 +26,10 @@ impl fmt::Display for Operator {
     }
 }
 
-// #[derive(Debug, Clone, PartialEq, PartialOrd)]
-// pub enum Num {
-//     Int(i128),
-//     Float(f64),
-// }
-
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-// ANCHOR: node
 pub enum Node {
     Var(String),
-    Num(f64),
+    Num(Number),
     UnaryExpr(Box<Node>),
     BinaryExpr {
         op: Operator,
@@ -46,17 +37,11 @@ pub enum Node {
         rhs: Box<Node>,
     },
 }
-// ANCHOR_END: node
 
 impl fmt::Display for Node {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         match &self {
-            // Node::Int(n) => write!(f, "{}", n),
-            // Node::Float(n) => write!(f, "{}", n),
-            // Node::Num(Num::Int(n)) => write!(f, "{}", n),
             Node::Num(n) => write!(f, "{}", n),
-            // Node::NegNum(Num::Int(n)) => write!(f, "{}", n),
-            // Node::NegNum(Num::Float(n)) => write!(f, "{}", n),
             Node::UnaryExpr(expr) => write!(f, "{}", expr),
             Node::BinaryExpr { op, lhs, rhs } => write!(f, "{} {} {}", lhs, op, rhs),
             Node::Var(var_name) => write!(f, "{}", var_name),

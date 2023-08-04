@@ -1,17 +1,15 @@
 #![allow(clippy::upper_case_acronyms)]
 
-use crate::ast::{Node, Num, Operator};
+use crate::ast::{Node, Operator};
 use crate::Result;
 use lazy_static::lazy_static;
 use pest::iterators::Pairs;
 use pest::pratt_parser::PrattParser;
 use pest::{self, Parser};
 
-// ANCHOR: parser
 #[derive(pest_derive::Parser)]
 #[grammar = "grammar.pest"]
 struct CalcParser;
-// ANCHOR_END: parser
 
 lazy_static! {
     static ref PRATT_PARSER: PrattParser<Rule> = {
@@ -81,24 +79,3 @@ pub fn parse(source: &str) -> Result<Node> {
 
     Ok(parsed)
 }
-
-// #[cfg(test)]
-// mod tests {
-//     #[test]
-//     fn nested_expr() {
-//         fn test_expr(expected: &str, src: &str) {
-//             assert_eq!(
-//                 expected,
-//                 parse(src)
-//                     .unwrap()
-//                     .iter()
-//                     .fold(String::new(), |acc, arg| acc + &format!("{}", &arg))
-//             );
-//         }
-//
-//         test_expr("1 + 2 + 3", "(1 + 2) + 3");
-//         test_expr("1 + 2 + 3", "1 + (2 + 3)");
-//         test_expr("1 + 2 + 3 + 4", "1 + (2 + (3 + 4))");
-//         test_expr("1 + 2 + 3 - 4", "(1 + 2) + (3 - 4)");
-//     }
-// }

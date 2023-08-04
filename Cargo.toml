@@ -14,7 +14,6 @@ src = "src/bin/calc-rs.rs"
 
 [dependencies]
 pyo3 = { version = "0.19.2", features = ["extension-module", "eyre"] }
-# anyhow = "1.0"
 pest = "2.6"
 pest_derive = "2.6"
 lazy_static = "1.4.0"

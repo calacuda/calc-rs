@@ -1,11 +1,9 @@
+// use crate::ast::Num;
+use crate::{Compile, Node, Operator, Result};
 use std::collections::HashMap;
 
-use eyre::bail;
-
-use crate::ast::Num;
-use crate::{Compile, Node, Operator, Result};
-
 pub type Vars = HashMap<String, f64>;
+pub type Num = Option<crate::ast::Number>;
 
 pub struct Interpreter;
 
@@ -26,79 +24,55 @@ impl Eval {
         Self
     }
 
-    // fn solve(&self, node: &Node) -> Node {}
-
     fn add(&self, lhs: Num, rhs: Num) -> Num {
-        lhs + rhs
-        // match (lhs, rhs) {
-        //     (Num::Int(i1), Num::Int(i2)) => Num::Int(i1 + i2),
-        //     (Num::Float(f1), Num::Float(f2)) => Num::Float(f1 + f2),
-        //     (Num::Int(i1), Num::Float(f2)) => Num::Float(i1 as f64 + f2),
-        //     (Num::Float(f1), Num::Int(i2)) => Num::Float(f1 + i2 as f64),
-        // }
+        match (lhs, rhs) {
+            (Some(lhs), Some(rhs)) => Some(lhs + rhs),
+            _ => None,
+        }
     }
 
     fn sub(&self, lhs: Num, rhs: Num) -> Num {
-        lhs - rhs
-        // match (lhs, rhs) {
-        //     (Num::Int(i1), Num::Int(i2)) => Num::Int(i1 - i2),
-        //     (Num::Float(f1), Num::Float(f2)) => Num::Float(f1 - f2),
-        //     (Num::Int(i1), Num::Float(f2)) => Num::Float(i1 as f64 - f2),
-        //     (Num::Float(f1), Num::Int(i2)) => Num::Float(f1 - i2 as f64),
-        // }
+        match (lhs, rhs) {
+            (Some(lhs), Some(rhs)) => Some(lhs - rhs),
+            _ => None,
+        }
     }
 
     fn mul(&self, lhs: Num, rhs: Num) -> Num {
-        lhs * rhs
-        // match (lhs, rhs) {
-        //     (Num::Int(i1), Num::Int(i2)) => Num::Int(i1 * i2),
-        //     (Num::Float(f1), Num::Float(f2)) => Num::Float(f1 * f2),
-        //     (Num::Int(i1), Num::Float(f2)) => Num::Float(i1 as f64 * f2),
-        //     (Num::Float(f1), Num::Int(i2)) => Num::Float(f1 * i2 as f64),
-        // }
+        match (lhs, rhs) {
+            (Some(lhs), Some(rhs)) => Some(lhs * rhs),
+            _ => None,
+        }
     }
 
     fn div(&self, lhs: Num, rhs: Num) -> Num {
-        lhs / rhs
-        // match (lhs, rhs) {
-        //     (Num::Int(i1), Num::Int(i2)) => Num::Int(i1 / i2),
-        //     (Num::Float(f1), Num::Float(f2)) => Num::Float(f1 / f2),
-        //     (Num::Int(i1), Num::Float(f2)) => Num::Float(i1 as f64 / f2),
-        //     (Num::Float(f1), Num::Int(i2)) => Num::Float(f1 / i2 as f64),
-        // }
+        match (lhs, rhs) {
+            (Some(lhs), Some(rhs)) if rhs != 0.0 => Some(lhs / rhs),
+            _ => None,
+        }
     }
 
     fn exp(&self, lhs: Num, rhs: Num) -> Num {
-        lhs.powf(rhs)
-        // match (lhs, rhs) {
-        //     (Num::Int(i1), Num::Int(i2)) => Num::Int(i1.pow(i2 as u32)),
-        //     (Num::Float(f1), Num::Float(f2)) => Num::Float(f1.powf(f2)),
-        //     (Num::Int(i1), Num::Float(f2)) => Num::Float((i1 as f64).powf(f2)),
-        //     (Num::Float(f1), Num::Int(i2)) => Num::Float(f1.powf(i2 as f64)),
-        // }
+        match (lhs, rhs) {
+            (Some(lhs), Some(rhs)) => Some(lhs.powf(rhs)),
+            _ => None,
+        }
     }
 
     pub fn eval(&self, node: &Node, vars: &Vars) -> Result<Num> {
         match node {
-            Node::Num(n) => Ok(n.clone()),
+            Node::Num(n) => Ok(Some(n.clone())),
             Node::Var(var) => {
                 if let Some(val) = vars.get(var) {
-                    Ok(*val)
+                    Ok(Some(*val))
                 } else {
                     eyre::bail!("unknown variable: {var}")
                 }
             }
             Node::UnaryExpr(expr) => {
                 let val = self.eval(expr, vars)?;
-                println!("interpreter found the unary operator applied to {:?}", val);
+                // println!("interpreter found a unary operator applied to {:?}", val);
                 Ok(val)
-                // if let Num::Int(n) = val {
-                //     Ok(Num::Int(-1 * n))
-                // } else if let Num::Float(n) = val {
-                //     Ok(Num::Float(-1.0 * n))
-                // } else {
-                //     unreachable!("the negative sign can not be applied to operations")
-                // }
             }
             Node::BinaryExpr { op, lhs, rhs } => match op {
                 Operator::Exponent => Ok(self.exp(self.eval(lhs, vars)?, self.eval(rhs, vars)?)),
