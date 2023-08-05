@@ -62,25 +62,39 @@ def to_expr(args: Tuple[Expr, List[Tuple[str, Expr]]]) -> Expr:
 
 
 def add(op1, op2):
+    if op1 is None or op2 is None:
+        return None
+
     return op1 + op2
 
 
 def sub(op1, op2):
+    if op1 is None or op2 is None:
+        return None
+
     return op1 - op2
 
 
 def mul(op1, op2):
+    if op1 is None or op2 is None:
+        return None
+
     return op1 * op2
 
 
 def div(op1, op2):
-    # TODO: add div by zero check
+   if op1 is None or op2 is None:
+        return None    
+
     if op2 != 0:
         return op1 / op2
     else:
         return None
 
 def exp(op1, op2):
+    if op1 is None or op2 is None:
+        return None
+    
     return op1 ** op2
 
 
