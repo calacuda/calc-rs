@@ -25,7 +25,7 @@ As you can see the rust version is significantly faster.
 
 there are three functions that this libray exposes:
 | **Function** | **Args** | **Description** |
-|-|-|
+| -- | -- | -- |
 | `solve` | equasions: list(str) | takes a list of equations as strings and solves eatch one returning a list of answers. |
 | `solve_func` | f: str, start: int, stop: int | solves the function, f, at all integer points between start and stop. |
 | `solve_funcs` | fs: list(str), start: int, stop: int | solves a list of functions, fs, for all integer points between start and stop. returns a dictionary whose keys are function names and whose values are a tuple of a list of x values and a list of y values. |
