@@ -100,7 +100,7 @@ pub fn solve_funcs(
     functions: Vec<&str>,
     start: i64,
     stop: i64,
-) -> PyResult<HashMap<String, (Vec<i64>, Vec<Option<f64>>)>> {
+) -> PyResult<HashMap<String, (Vec<i64>, Vec<Num>)>> {
     let mut map = HashMap::new();
 
     for f in functions {
