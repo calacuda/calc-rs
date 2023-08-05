@@ -12,10 +12,16 @@ crate-type = ["cdylib", "lib"]
 name = "calc-rs"
 src = "src/bin/calc-rs.rs"
 
+[features]
+extension-module = ["pyo3/extension-module"]
+default = ["extension-module"]
+
 [dependencies]
 pyo3 = { version = "0.19.2", features = ["extension-module", "eyre"] }
 pest = "2.6"
 pest_derive = "2.6"
 lazy_static = "1.4.0"
-eyre = { version = "0.6.8", features = ["pyo3"] }
+eyre = "0.6.8"
 regex = "1.9.1"
+rayon = "1.7.0"
+# anyhow = "1.0.72"

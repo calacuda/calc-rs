@@ -5,12 +5,14 @@ pub use crate::ast::{Node, Operator};
 pub use crate::compiler::interpreter::Interpreter;
 pub use crate::compiler::interpreter::Num;
 pub use compiler::interpreter::Vars;
-use eyre;
+// use pyo3::eyre::bail;
+pub use eyre::{bail, Result};
 use pyo3::prelude::*;
+use rayon::prelude::*;
 use regex;
 use std::collections::HashMap;
 
-pub type Result<T> = eyre::Result<T>;
+// pub type Result<T> = Result<T>;
 
 pub trait Compile {
     type Output;
@@ -32,7 +34,7 @@ fn prepare_equ(equ: &str) -> String {
     equ.to_string()
 }
 
-pub fn solve_equ(equation: &str, vars: &Vars) -> eyre::Result<Num> {
+pub fn solve_equ(equation: &str, vars: &Vars) -> Result<Num> {
     let equ = prepare_equ(equation);
     // println!("equ => {:?}", equ);
     Ok(Interpreter::from_source(&equ, vars)?)
@@ -44,7 +46,7 @@ fn solve(equations: Vec<&str>) -> PyResult<Vec<Num>> {
     let vars = Vars::new();
 
     Ok(equations
-        .into_iter()
+        .par_iter()
         .map(|equ| {
             let res = solve_equ(equ, &vars);
             if let Ok(ans) = res {
@@ -60,7 +62,7 @@ fn solve(equations: Vec<&str>) -> PyResult<Vec<Num>> {
 /// solves a single function, given a start and end of domain
 #[pyfunction]
 fn solve_func(function: &str, start: i64, stop: i64) -> Result<(String, (Vec<i64>, Vec<Num>))> {
-    let Some((f_name, f_def)) = function.split_once("=") else { eyre::bail!("function definitions require and equals sign.") };
+    let Some((f_name, f_def)) = function.split_once("=") else { bail!("function definitions require and equals sign.") };
     let arg_name = f_name
         .split_once("(")
         .unwrap_or(("", "x)"))
@@ -73,6 +75,7 @@ fn solve_func(function: &str, start: i64, stop: i64) -> Result<(String, (Vec<i64
         (
             (start..=stop).collect(),
             (start..=stop)
+                .into_par_iter()
                 .map(|x| {
                     let mut vars = HashMap::new();
                     vars.insert(arg_name.trim().to_string(), x as f64);
@@ -102,7 +105,10 @@ pub fn solve_funcs(
 
     for f in functions {
         let (f_def, ans) = solve_func(f, start, stop)?;
-        map.insert(f_def.replace(" ", ""), ans);
+        map.insert(f_def.trim().to_string(), ans);
+        // } else {
+        //     bail!("could not compute function : {f}");
+        // }
     }
 
     Ok(map)

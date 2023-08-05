@@ -66,7 +66,7 @@ impl Eval {
                 if let Some(val) = vars.get(var) {
                     Ok(Some(*val))
                 } else {
-                    eyre::bail!("unknown variable: {var}")
+                    crate::bail!("unknown variable: {var}")
                 }
             }
             Node::UnaryExpr(expr) => {

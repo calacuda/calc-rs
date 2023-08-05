@@ -1,0 +1,23 @@
+var = @{ ASCII_ALPHA }
+
+num = @{ unary_minus? ~ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
+  int = @{ ASCII_DIGIT+ }
+
+unary_minus = _{ "-" }
+negative = { unary_minus ~ primary }
+primary = _{ var | num | num? ~ "(" ~ (expr | var) ~ ")" }
+atom = _{ var | primary | negative }
+
+bin_op = _{ add | subtract | multiply | divide | power }
+	add = { "+" }
+	subtract = { "-" }
+	multiply = { "*" }
+	divide = { "/" }
+	power = { "^" }
+
+expr = { atom ~ (bin_op ~ atom)* | EOI }
+
+// We can't have SOI and EOI on expr directly, because it is used recursively (e.g. with parentheses)
+equation = _{ SOI ~ expr}
+
+WHITESPACE = _{ " " | "\t" }
