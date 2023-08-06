@@ -6,19 +6,11 @@
 name: CI
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  #     - master
-  #   tags:
-  #     - "*"
-  # pull_request:
+  push:
+    branches: ["main"]
+    tags: ["*"]
+  pull_request:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Tests"]
-    branches: [main]
-    types:
-      - completed
 
 permissions:
   contents: read
@@ -36,6 +28,8 @@ jobs:
   #       with:
   #         command: test
   #         args: --no-default-features
+  cargo-test:
+    uses: calacuda/calc-rs/.github/workflows/test.yml@main
 
   linux:
     runs-on: ubuntu-latest
