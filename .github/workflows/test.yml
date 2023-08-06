@@ -31,4 +31,4 @@ jobs:
         with:
           toolchain: stable
       - name: "Run the Tests"
-        run: "cargo test --no-default-features"
+        run: "cargo test"
