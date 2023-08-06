@@ -1,97 +1,29 @@
-pub mod ast;
-pub mod compiler;
-pub mod parser;
-pub use crate::ast::{Node, Operator};
-pub use crate::compiler::interpreter::Interpreter;
-pub use crate::compiler::interpreter::Num;
-pub use compiler::interpreter::Vars;
-// use pyo3::eyre::bail;
-pub use eyre::{bail, Result};
+use calc_rs;
+use calc_rs::Num;
+use calc_rs::Vars;
 use pyo3::prelude::*;
-use rayon::prelude::*;
-use regex;
+use pyo3::PyResult;
 use std::collections::HashMap;
 
-// pub type Result<T> = Result<T>;
-
-pub trait Compile {
-    type Output;
-
-    fn from_ast(ast: &Node, vars: &Vars) -> Self::Output;
-
-    fn from_source(source: &str, vars: &Vars) -> Self::Output {
-        // println!("Compiling the source: {}", source);
-        let ast: Node = parser::parse(source).unwrap();
-        // println!("ast => {:?}", ast);
-        Self::from_ast(&ast, vars)
-    }
-}
-
-fn prepare_equ(equ: &str) -> String {
-    let re = regex::Regex::new(r"([\da-zA-Z])([a-zA-Z\(])").unwrap();
-    let equ = re.replacen(equ, 0, "$1 * $2");
-
-    equ.to_string()
-}
-
-pub fn solve_equ(equation: &str, vars: &Vars) -> Result<Num> {
-    let equ = prepare_equ(equation);
-    // println!("equ => {:?}", equ);
-    Ok(Interpreter::from_source(&equ, vars)?)
+#[pyfunction]
+pub fn solve_equ(equation: &str, vars: Vars) -> PyResult<Num> {
+    Ok(calc_rs::solve_equ(equation, &vars)?)
 }
 
 /// solves a list of equations
 #[pyfunction]
-fn solve(equations: Vec<&str>) -> PyResult<Vec<Num>> {
-    let vars = Vars::new();
-
-    Ok(equations
-        .par_iter()
-        .map(|equ| {
-            let res = solve_equ(equ, &vars);
-            if let Ok(ans) = res {
-                ans
-            } else {
-                println!("{res:?}");
-                None
-            }
-        })
-        .collect())
+pub fn solve_equs(equations: Vec<&str>) -> PyResult<Vec<Num>> {
+    Ok(calc_rs::solve_equs(equations)?)
 }
 
 /// solves a single function, given a start and end of domain
 #[pyfunction]
-fn solve_func(function: &str, start: i64, stop: i64) -> Result<(String, (Vec<i64>, Vec<Num>))> {
-    let Some((f_name, f_def)) = function.split_once("=") else { bail!("function definitions require and equals sign.") };
-    let arg_name = f_name
-        .split_once("(")
-        .unwrap_or(("", "x)"))
-        .1
-        .replace(")", "");
-    let ast = parser::parse(prepare_equ(&f_def).as_str())?;
-
-    Ok((
-        f_name.to_string(),
-        (
-            (start..=stop).collect(),
-            (start..=stop)
-                .into_par_iter()
-                .map(|x| {
-                    let mut vars = HashMap::new();
-                    vars.insert(arg_name.trim().to_string(), x as f64);
-                    let res = Interpreter::from_ast(&ast.clone(), &vars);
-                    // println!("{vars:?}");
-
-                    if let Ok(ans) = res {
-                        ans
-                    } else {
-                        println!("{res:?}");
-                        None
-                    }
-                })
-                .collect(),
-        ),
-    ))
+pub fn solve_func(
+    function: &str,
+    start: i64,
+    stop: i64,
+) -> PyResult<(String, (Vec<i64>, Vec<Num>))> {
+    Ok(calc_rs::solve_func(function, start, stop)?)
 }
 
 /// solves functions and returns a python dictionary that maps function name to (x_values, y_valiues)
@@ -101,22 +33,13 @@ pub fn solve_funcs(
     start: i64,
     stop: i64,
 ) -> PyResult<HashMap<String, (Vec<i64>, Vec<Num>)>> {
-    let mut map = HashMap::new();
-
-    for f in functions {
-        let (f_def, ans) = solve_func(f, start, stop)?;
-        map.insert(f_def.trim().to_string(), ans);
-        // } else {
-        //     bail!("could not compute function : {f}");
-        // }
-    }
-
-    Ok(map)
+    Ok(calc_rs::solve_funcs(functions, start, stop)?)
 }
 
 #[pymodule]
-fn calc_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(solve, m)?)?;
+fn calculators(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_function(wrap_pyfunction!(solve_equs, m)?)?;
+    m.add_function(wrap_pyfunction!(solve_equ, m)?)?;
     m.add_function(wrap_pyfunction!(solve_funcs, m)?)?;
     m.add_function(wrap_pyfunction!(solve_func, m)?)?;
 

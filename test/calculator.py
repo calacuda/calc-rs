@@ -83,7 +83,7 @@ def mul(op1, op2):
 
 
 def div(op1, op2):
-   if op1 is None or op2 is None:
+    if op1 is None or op2 is None:
         return None    
 
     if op2 != 0:

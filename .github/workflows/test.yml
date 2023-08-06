@@ -8,7 +8,7 @@ name: Test
 on:
   push:
     branches:
-      - "*"
+      - ["dev"]
     tags:
       - "*"
   pull_request:
@@ -20,16 +20,13 @@ permissions:
 jobs:
   cargo-test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust-lib
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-      - uses: PyO3/maturin-action@v1
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --no-default-features
+      - name: "Run the Tests"
+        run: "cargo test --no-default-features"

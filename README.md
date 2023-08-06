@@ -35,5 +35,5 @@ there are three functions that this libray exposes:
 with pip:
 
 ```
-pip install https://github.com/calacuda/calc-rs.git
+pip install calc-rs
 ```
