@@ -6,6 +6,7 @@ pub use crate::compiler::interpreter::Interpreter;
 pub use crate::compiler::interpreter::Num;
 pub use compiler::interpreter::Vars;
 pub use eyre::{bail, Result};
+pub use log::{debug, error, info, trace, warn};
 use rayon::prelude::*;
 use regex;
 use std::collections::HashMap;
@@ -16,11 +17,17 @@ pub trait Compile {
     fn from_ast(ast: &Node, vars: &Vars) -> Self::Output;
 
     fn from_source(source: &str, vars: &Vars) -> Self::Output {
-        // println!("Compiling the source: {}", source);
+        debug!("Compiling the source: {}", source);
         let ast: Node = parser::parse(source).unwrap();
-        // println!("ast => {:?}", ast);
+        debug!("ast => {:?}", ast);
         Self::from_ast(&ast, vars)
     }
+}
+
+pub fn init_logger() {
+    use simple_logger::SimpleLogger;
+
+    let _ = SimpleLogger::new().without_timestamps().init();
 }
 
 fn prepare_equ(equation: &str) -> String {
@@ -34,13 +41,15 @@ fn prepare_equ(equation: &str) -> String {
 }
 
 pub fn solve_equ(equation: &str, vars: &Vars) -> Result<Num> {
+    init_logger();
     let equ = prepare_equ(equation);
-    // println!("equ => {:?}", equ);
+    // debug!("equ => {:?}", equ);
     Ok(Interpreter::from_source(&equ, vars)?)
 }
 
 /// solves a list of equations
 pub fn solve_equs(equations: Vec<&str>) -> Result<Vec<Num>> {
+    init_logger();
     let vars = Vars::new();
 
     Ok(equations
@@ -51,7 +60,7 @@ pub fn solve_equs(equations: Vec<&str>) -> Result<Vec<Num>> {
             if let Ok(ans) = res {
                 ans
             } else {
-                println!("{res:?}");
+                error!("{res:?}");
                 None
             }
         })
@@ -60,12 +69,14 @@ pub fn solve_equs(equations: Vec<&str>) -> Result<Vec<Num>> {
 
 /// solves a single function, given a start and end of domain
 pub fn solve_func(function: &str, start: i64, stop: i64) -> Result<(String, (Vec<i64>, Vec<Num>))> {
+    init_logger();
     let Some((f_name, f_def)) = function.split_once("=") else { bail!("function definitions require and equals sign.") };
     let arg_name = f_name
         .split_once("(")
         .unwrap_or(("", "x)"))
         .1
         .replace(")", "");
+    println!("f_def => {}", f_def);
     let ast = parser::parse(prepare_equ(&f_def).as_str())?;
 
     Ok((
@@ -78,12 +89,12 @@ pub fn solve_func(function: &str, start: i64, stop: i64) -> Result<(String, (Vec
                     let mut vars = HashMap::new();
                     vars.insert(arg_name.trim().to_string(), x as f64);
                     let res = Interpreter::from_ast(&ast.clone(), &vars);
-                    // println!("{vars:?}");
+                    debug!("{vars:?}");
 
                     if let Ok(ans) = res {
                         ans
                     } else {
-                        println!("{res:?}");
+                        error!("{res:?}");
                         None
                     }
                 })
@@ -98,6 +109,7 @@ pub fn solve_funcs(
     start: i64,
     stop: i64,
 ) -> Result<HashMap<String, (Vec<i64>, Vec<Num>)>> {
+    init_logger();
     let mut map = HashMap::new();
 
     for f in functions {
@@ -110,12 +122,13 @@ pub fn solve_funcs(
 
 #[cfg(test)]
 mod tests {
-    use crate::Result;
+    use crate::{info, init_logger, Result};
     use std::collections::HashMap;
 
     #[test]
     fn equation_solver() -> Result<()> {
         use crate::{solve_equ, solve_equs};
+        init_logger();
 
         fn test_expr(equation: &str, answer: Option<f64>) -> Result<()> {
             assert_eq!(solve_equs(vec![equation])?, vec![answer]);
@@ -130,17 +143,20 @@ mod tests {
         test_expr("4(10+4)^2", Some(784.0))?;
         test_expr("5%2", Some(1.0))?;
         test_expr("15%4", Some(3.0))?;
+        // TODO: add Riemann sum tests
 
         Ok(())
     }
 
     #[test]
     fn function_solver() -> Result<()> {
+        use crate::init_logger;
         use crate::solve_func;
 
         fn test_expr(equation: &str, answers: Vec<(i64, Option<f64>)>) -> Result<()> {
+            init_logger();
             let is = solve_func(equation, -2, 2)?.1;
-            println!("{:?}", is);
+            info!("{:?}", is);
             let mut should_be: (Vec<i64>, Vec<Option<f64>>) =
                 (Vec::with_capacity(5), Vec::with_capacity(5));
 

@@ -11,6 +11,7 @@ pub enum Operator {
     Exponent,
     Negative,
     Modulo,
+    Riemann,
 }
 
 impl fmt::Display for Operator {
@@ -22,12 +23,14 @@ impl fmt::Display for Operator {
             Operator::Divide => write!(f, "/"),
             Operator::Exponent => write!(f, "^"),
             Operator::Modulo => write!(f, "%"),
+            Operator::Riemann => write!(f, "∑"),
         }
     }
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Node {
+    Range(String),
     Var(String),
     Num(Number),
     UnaryExpr(Box<Node>),
@@ -45,6 +48,7 @@ impl fmt::Display for Node {
             Node::UnaryExpr(expr) => write!(f, "{}", expr),
             Node::BinaryExpr { op, lhs, rhs } => write!(f, "{} {} {}", lhs, op, rhs),
             Node::Var(var_name) => write!(f, "{}", var_name),
+            Node::Range(range) => write!(f, "{}", range),
         }
     }
 }

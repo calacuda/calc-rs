@@ -1,22 +1,26 @@
 var = @{ ASCII_ALPHA }
 
+range = @{ var ~ "=" ~ num ~ "_" ~ num }
+riemann_expr = _{ range ~ riemann ~ "(" ~ expr ~ ")" }
+
 num = @{ unary_minus? ~ int ~ ("." ~ ASCII_DIGIT*)? ~ (^"e" ~ int)? }
   int = @{ ASCII_DIGIT+ }
 
 unary_minus = _{ "-" }
 negative = { unary_minus ~ primary }
-primary = _{ var | num | num? ~ "(" ~ (expr | var) ~ ")" }
-atom = _{ var | primary | negative }
+primary = _{ riemann_expr | var | num | num? ~ "(" ~ (expr | var | riemann_expr) ~ ")" }
+atom = _{ riemann_expr | primary | var | negative }
 
-bin_op = _{ add | subtract | multiply | divide | modulo | power }
+bin_op = _{ add | subtract | multiply | divide | modulo | power | riemann }
 	add = { "+" }
 	subtract = { "-" }
 	multiply = { "*" }
 	divide = { "/" }
 	modulo = { "%" }
 	power = { "^" }
+	riemann = { "$" }
 
-expr = { atom ~ (bin_op ~ atom)* | EOI }
+expr = { (atom ~ (bin_op ~ atom)*) | EOI }
 
 // We can't have SOI and EOI on expr directly, because it is used recursively (e.g. with parentheses)
 equation = _{ SOI ~ expr }
