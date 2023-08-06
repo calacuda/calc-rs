@@ -128,6 +128,8 @@ mod tests {
         test_expr("1 + 2 + 3 - 4", Some(2.0))?;
         test_expr("4/(10+4)^2", Some(0.02040816326530612))?;
         test_expr("4(10+4)^2", Some(784.0))?;
+        test_expr("5%2", Some(1.0))?;
+        test_expr("15%4", Some(3.0))?;
 
         Ok(())
     }

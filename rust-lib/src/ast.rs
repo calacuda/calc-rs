@@ -10,7 +10,7 @@ pub enum Operator {
     Divide,
     Exponent,
     Negative,
-    // Modulo,
+    Modulo,
 }
 
 impl fmt::Display for Operator {
@@ -21,7 +21,7 @@ impl fmt::Display for Operator {
             Operator::Multiply => write!(f, "*"),
             Operator::Divide => write!(f, "/"),
             Operator::Exponent => write!(f, "^"),
-            // Operator::Modulo => write!(f, "%"),
+            Operator::Modulo => write!(f, "%"),
         }
     }
 }

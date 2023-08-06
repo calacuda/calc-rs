@@ -18,7 +18,7 @@ lazy_static! {
 
         PrattParser::new()
             .op(Op::infix(add, Left) | Op::infix(subtract, Left))
-            .op(Op::infix(multiply, Left) | Op::infix(divide, Left))
+            .op(Op::infix(multiply, Left) | Op::infix(divide, Left) | Op::infix(modulo, Left))
             .op(Op::infix(power, Right))
     };
 }
@@ -50,6 +50,7 @@ fn parse_expr(pairs: Pairs<Rule>, pratt_parser: &PRATT_PARSER) -> Node {
                 Rule::divide => Operator::Divide,
                 Rule::power => Operator::Exponent,
                 Rule::unary_minus => Operator::Negative,
+                Rule::modulo => Operator::Modulo,
                 rule => unreachable!("Expr::parse expected infix operation, found {:?}", rule),
             };
             // println!("infix => {}{}{}", lhs, op, rhs);

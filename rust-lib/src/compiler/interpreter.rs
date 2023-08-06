@@ -1,4 +1,3 @@
-// use crate::ast::Num;
 use crate::{Compile, Node, Operator, Result};
 use std::collections::HashMap;
 
@@ -59,6 +58,13 @@ impl Eval {
         }
     }
 
+    fn modulo(&self, lhs: Num, rhs: Num) -> Num {
+        match (lhs, rhs) {
+            (Some(lhs), Some(rhs)) => Some(lhs % rhs),
+            _ => None,
+        }
+    }
+
     pub fn eval(&self, node: &Node, vars: &Vars) -> Result<Num> {
         match node {
             Node::Num(n) => Ok(Some(n.clone())),
@@ -80,25 +86,9 @@ impl Eval {
                 Operator::Multiply => Ok(self.mul(self.eval(lhs, vars)?, self.eval(rhs, vars)?)),
                 Operator::Plus => Ok(self.add(self.eval(lhs, vars)?, self.eval(rhs, vars)?)),
                 Operator::Minus => Ok(self.sub(self.eval(lhs, vars)?, self.eval(rhs, vars)?)),
+                Operator::Modulo => Ok(self.modulo(self.eval(lhs, vars)?, self.eval(rhs, vars)?)),
                 Operator::Negative => unreachable!("negative numbers can only have one operand"),
             },
         }
     }
 }
-
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//
-//     #[test]
-//     fn basics() {
-//         assert_eq!(Interpreter::from_source("1 + 2").unwrap() as i32, 3);
-//         // assert_eq!(Interpreter::source("(1 + 2)").unwrap() as i32, 3);
-//         assert_eq!(Interpreter::from_source("2 + (2 - 1)").unwrap() as i32, 3);
-//         assert_eq!(Interpreter::from_source("(2 + 3) - 1").unwrap() as i32, 4);
-//         assert_eq!(
-//             Interpreter::from_source("1 + ((2 + 3) - (2 + 3))").unwrap() as i32,
-//             1
-//         );
-//     }
-// }
