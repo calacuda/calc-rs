@@ -143,7 +143,7 @@ mod tests {
         test_expr("4(10+4)^2", Some(784.0))?;
         test_expr("5%2", Some(1.0))?;
         test_expr("15%4", Some(3.0))?;
-        // TODO: add Riemann sum tests
+        test_expr("3(i=0_5$(i))", Some(45.0))?;
 
         Ok(())
     }
@@ -199,6 +199,16 @@ mod tests {
                 (0, Some(0.0)),
                 (1, Some(15.0)),
                 (2, Some(60.0)),
+            ],
+        )?;
+        test_expr(
+            "i(x) = i=0_5$(3x)",
+            vec![
+                (-2, Some(-36.0)),
+                (-1, Some(-18.0)),
+                (0, Some(0.0)),
+                (1, Some(18.0)),
+                (2, Some(36.0)),
             ],
         )?;
 
