@@ -6,11 +6,6 @@
 name: CI
 
 on:
-  workflow_run:
-    workflows: ["Tests"]
-    branches: [main]
-    # types:
-    #   - completed
   push:
     branches:
       - main
@@ -18,7 +13,12 @@ on:
     tags:
       - "*"
   pull_request:
-  workflow_dispatch:
+  # workflow_dispatch:
+  workflow_run:
+    workflows: ["Tests"]
+    branches: [main]
+    types:
+      - completed
 
 permissions:
   contents: read

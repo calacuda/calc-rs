@@ -8,7 +8,7 @@ name: Test
 on:
   push:
     branches:
-      - ["dev"]
+      - ["main", "master", "dev"]
     tags:
       - "*"
   pull_request:
