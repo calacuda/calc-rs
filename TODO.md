@@ -4,3 +4,4 @@
 - [x] add riemann sum operator
 - [x] add modulo
 - [ ] add examples to README.md
+- [ ] add redimentary limit calculations
