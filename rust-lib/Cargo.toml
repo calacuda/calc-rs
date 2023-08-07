@@ -1,6 +1,6 @@
 [package]
 name = "calc_rs"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -14,3 +14,6 @@ lazy_static = "1.4.0"
 eyre = "0.6.8"
 regex = "1.9.1"
 rayon = "1.7.0"
+log = { version = "0.4.19", features = ["release_max_level_warn", "max_level_trace"] }
+simple_logger = "4.2.0"
+
