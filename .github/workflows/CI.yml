@@ -7,8 +7,10 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
-    tags: ["*"]
+    branches:
+      - main
+    tags:
+      - "*"
   pull_request:
   workflow_dispatch:
 
@@ -17,7 +19,8 @@ permissions:
 
 jobs:
   cargo-test:
-    uses: calacuda/calc-rs/.github/workflows/test.yml@main
+    steps:
+      - uses: ./.github/workflows/Test.yml
 
   linux:
     runs-on: ubuntu-latest
