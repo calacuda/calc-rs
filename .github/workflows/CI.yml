@@ -9,7 +9,6 @@ on:
   push:
     branches:
       - main
-      - master
     tags:
       - "*"
   pull_request:
@@ -25,7 +24,8 @@ permissions:
 
 jobs:
   cargo-test:
-    use: ./.github/workflows/Test.yml
+    steps:
+      - use: ./.github/workflows/Test.yml
 
   linux:
     runs-on: ubuntu-latest
