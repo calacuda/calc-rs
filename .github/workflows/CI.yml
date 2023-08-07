@@ -13,11 +13,6 @@ on:
       - "*"
   pull_request:
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Tests"]
-    branches: [main]
-    types:
-      - completed
 
 permissions:
   contents: read
@@ -26,6 +21,7 @@ jobs:
   cargo-test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - uses: ./.github/workflows/Test.yml
 
   linux:
@@ -40,7 +36,6 @@ jobs:
         with:
           python-version: "3.10"
       - name: Build wheels
-        # working-directory: ./python-lib
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
@@ -48,7 +43,6 @@ jobs:
           sccache: "true"
           manylinux: auto
       - name: Upload wheels
-        # working-directory: ./python-lib
         uses: actions/upload-artifact@v3
         with:
           name: wheels
@@ -67,14 +61,12 @@ jobs:
           python-version: "3.10"
           architecture: ${{ matrix.target }}
       - name: Build wheels
-        # working-directory: ./python-lib
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: "true"
       - name: Upload wheels
-        # working-directory: ./python-lib
         uses: actions/upload-artifact@v3
         with:
           name: wheels
@@ -92,14 +84,12 @@ jobs:
         with:
           python-version: "3.10"
       - name: Build wheels
-        # working-directory: ./python-lib
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
           args: --release --out dist --find-interpreter
           sccache: "true"
       - name: Upload wheels
-        # working-directory: ./python-lib
         uses: actions/upload-artifact@v3
         with:
           name: wheels
@@ -111,7 +101,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build sdist
-        # working-directory: ./python-lib
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
@@ -129,11 +118,9 @@ jobs:
     needs: [linux, windows, macos, sdist]
     steps:
       - uses: actions/download-artifact@v3
-        # working-directory: ./python-lib
         with:
           name: wheels
       - name: Publish to PyPI
-        # working-directory: ./python-lib
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
