@@ -70,13 +70,23 @@ pub fn solve_equs(equations: Vec<&str>) -> Result<Vec<Num>> {
 /// solves a single function, given a start and end of domain
 pub fn solve_func(function: &str, start: i64, stop: i64) -> Result<(String, (Vec<i64>, Vec<Num>))> {
     init_logger();
-    let Some((f_name, f_def)) = function.split_once("=") else { bail!("function definitions require and equals sign.") };
-    let arg_name = f_name
-        .split_once("(")
-        .unwrap_or(("", "x)"))
-        .1
-        .replace(")", "");
-    println!("f_def => {}", f_def);
+    // TODO: added check for proper function syntax here.
+    let re = regex::Regex::new(r"^([a-zA-Z])\(([a-zA-Z])\)[ ]?=[ ]?([ -~]+)$").unwrap();
+
+    // let Some((f_name, f_def)) = function.split_once("=") else { bail!("function definitions require and equals sign.") };
+    // let arg_name = f_name
+    //     .split_once("(")
+    //     .unwrap_or(("", "x)"))
+    //     .1
+    //     .replace(")", "");
+    let Some((_full_capture, [f_name, arg_name, f_def])) = re.captures(function).map(|caps| caps.extract()) else {
+        bail!("the provided function is not properly formated")
+    };
+
+    // let (f_name, arg_name, f_def) = (m.get(1)?.as_str(), m.get(2)?.as_str(), m.get(3)?.as_str());
+    debug!("reconstructed function: {f_name}({arg_name}) = {f_def}");
+
+    info!("f_def => {}", &f_def);
     let ast = parser::parse(prepare_equ(&f_def).as_str())?;
 
     Ok((
@@ -122,7 +132,7 @@ pub fn solve_funcs(
 
 #[cfg(test)]
 mod tests {
-    use crate::{info, init_logger, Result};
+    use crate::{bail, error, info, init_logger, Result};
     use std::collections::HashMap;
 
     #[test]
@@ -144,6 +154,7 @@ mod tests {
         test_expr("5%2", Some(1.0))?;
         test_expr("15%4", Some(3.0))?;
         test_expr("3(i=0_5$(i))", Some(45.0))?;
+        test_expr("5/0", None)?;
 
         Ok(())
     }
@@ -211,6 +222,14 @@ mod tests {
                 (2, Some(36.0)),
             ],
         )?;
+        if let Ok(_) = solve_func("3(i=0_5$(i))", -2, 2) {
+            error!("function solver trying to solve rieman sum not inside a function");
+            bail!("function solver trying to solve rieman sum not inside a function");
+        }
+        if let Ok(_) = solve_func("5+4", -2, 2) {
+            error!("function solver trying to solve a basic, non-function statement");
+            bail!("function solver trying to solve a basic, non-function statement");
+        }
 
         Ok(())
     }
