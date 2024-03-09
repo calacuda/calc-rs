@@ -1,10 +1,6 @@
-use crate::{debug, Compile, Node, Operator, Result};
+use crate::{debug, Compile, Node, Operator, Result, Num, Vars};
 use eyre::bail;
 use regex::Regex;
-use std::collections::HashMap;
-
-pub type Vars = HashMap<String, f64>;
-pub type Num = Option<crate::ast::Number>;
 
 pub struct Interpreter;
 

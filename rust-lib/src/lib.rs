@@ -1,15 +1,15 @@
 pub mod ast;
 pub mod compiler;
 pub mod parser;
-pub use crate::ast::{Node, Operator};
-pub use crate::compiler::interpreter::Interpreter;
-pub use crate::compiler::interpreter::Num;
-pub use compiler::interpreter::Vars;
-pub use eyre::{bail, Result};
-pub use log::{debug, error, info, trace, warn};
+use ast::{Node, Operator};
+use compiler::interpreter::Interpreter;
+use eyre::{bail, Result};
+use log::{debug, error, info};
 use rayon::prelude::*;
-use regex;
 use std::collections::HashMap;
+
+pub type Vars = HashMap<String, f64>;
+pub type Num = Option<crate::ast::Number>;
 
 pub trait Compile {
     type Output;
@@ -67,19 +67,35 @@ pub fn solve_equs(equations: Vec<&str>) -> Result<Vec<Num>> {
         .collect())
 }
 
-/// solves a single function, given a start and end of domain
-pub fn solve_func(function: &str, start: i64, stop: i64) -> Result<(String, (Vec<i64>, Vec<Num>))> {
-    init_logger();
-    // TODO: added check for proper function syntax here.
+fn solve_trusted_ast(ast: Node, arg_name: &str, start: i64, stop: i64) -> (Vec<i64>, Vec<Num>) {
+
+    (
+        (start..=stop).collect(),
+        (start..=stop)
+            .into_par_iter()
+            .map(|x| {
+                let mut vars = HashMap::new();
+                vars.insert(arg_name.trim().to_string(), x as f64);
+                let res = Interpreter::from_ast(&ast.clone(), &vars);
+                debug!("{vars:?}");
+
+                if let Ok(ans) = res {
+                    ans
+                } else {
+                    error!("{res:?}");
+                    None
+                }
+            })
+            .collect(),
+    )
+}
+
+fn parse_function(function: &str) -> Result<(String, String, Node)> {
     let re = regex::Regex::new(r"^([a-zA-Z])\(([a-zA-Z])\)[ ]?=[ ]?([ -~]+)$").unwrap();
 
-    // let Some((f_name, f_def)) = function.split_once("=") else { bail!("function definitions require and equals sign.") };
-    // let arg_name = f_name
-    //     .split_once("(")
-    //     .unwrap_or(("", "x)"))
-    //     .1
-    //     .replace(")", "");
-    let Some((_full_capture, [f_name, arg_name, f_def])) = re.captures(function).map(|caps| caps.extract()) else {
+    let Some((_full_capture, [f_name, arg_name, f_def])) =
+        re.captures(function).map(|caps| caps.extract())
+    else {
         bail!("the provided function is not properly formated")
     };
 
@@ -89,45 +105,45 @@ pub fn solve_func(function: &str, start: i64, stop: i64) -> Result<(String, (Vec
     info!("f_def => {}", &f_def);
     let ast = parser::parse(prepare_equ(&f_def).as_str())?;
 
-    Ok((
-        f_name.to_string(),
-        (
-            (start..=stop).collect(),
-            (start..=stop)
-                .into_par_iter()
-                .map(|x| {
-                    let mut vars = HashMap::new();
-                    vars.insert(arg_name.trim().to_string(), x as f64);
-                    let res = Interpreter::from_ast(&ast.clone(), &vars);
-                    debug!("{vars:?}");
+    Ok((f_name.to_string(), arg_name.to_string(), ast))
+}
 
-                    if let Ok(ans) = res {
-                        ans
-                    } else {
-                        error!("{res:?}");
-                        None
-                    }
-                })
-                .collect(),
-        ),
-    ))
+/// solves a single function, given a start and end of domain
+pub fn solve_func(function: &str, start: i64, stop: i64) -> Result<(String, (Vec<i64>, Vec<Num>))> {
+    init_logger();
+    
+    let (f_name, arg_name, ast) = parse_function(function)?;
+
+    Ok((f_name, solve_trusted_ast(ast, &arg_name, start, stop)))
 }
 
 /// solves functions and returns a python dictionary that maps function name to (x_values, y_valiues)
+/// TODO: optimize using par_iter to get parallelism.
 pub fn solve_funcs(
     functions: Vec<&str>,
     start: i64,
     stop: i64,
 ) -> Result<HashMap<String, (Vec<i64>, Vec<Num>)>> {
     init_logger();
-    let mut map = HashMap::new();
+    // let mut map = HashMap::new();
 
-    for f in functions {
-        let (f_def, ans) = solve_func(f, start, stop)?;
-        map.insert(f_def.trim().to_string(), ans);
-    }
+    // for f in functions {
+    //     let (f_def, ans) = solve_func(f, start, stop)?;
+    //     map.insert(f_def.trim().to_string(), ans);
+    // }
+    let f_s: Result<Vec<(String, String, Node)>> = functions
+        .par_iter()
+        .map(|f| parse_function(&f))
+        .collect();
+    Ok(f_s?
+        .into_par_iter()
+        .map(
+            |(f_name, arg_name, ast)| {
+                (f_name.trim().to_string(), solve_trusted_ast(ast, &arg_name, start, stop))
+            }
+        ).collect())
 
-    Ok(map)
+    // Ok(map)
 }
 
 #[cfg(test)]

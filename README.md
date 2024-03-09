@@ -14,9 +14,9 @@ Benchmark 1:  python -c "import calculator as calc; calc.solve_func(\"f(x)= 4+3x
 
 
 testing rust version:
-Benchmark 1:  python -c "import calc_rs as calc; calc.solve_func(\"f(x)= 4+3x+x^2+x^3\", -1000, 1000)"
-  Time (mean ± σ):      65.0 ms ±   1.2 ms    [User: 57.6 ms, System: 13.5 ms]
-  Range (min … max):    63.3 ms …  69.2 ms    50 runs
+Benchmark 1:  python -c "import calculators as calc; calc.solve_func(\"f(x)= 4+3x+x^2+x^3\", -1000, 1000)"
+  Time (mean ± σ):      11.8 ms ±   0.8 ms    [User: 10.6 ms, System: 3.6 ms]
+  Range (min … max):    11.1 ms …  14.5 ms    25 runs
 ```
 
 As you can see the rust version is significantly faster.

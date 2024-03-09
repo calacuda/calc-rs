@@ -3,9 +3,7 @@ use crate::ast::{Node, Operator};
 use crate::Result;
 use crate::{debug, info};
 use lazy_static::lazy_static;
-use pest::iterators::Pairs;
-use pest::pratt_parser::PrattParser;
-use pest::{self, Parser};
+use pest::{iterators::Pairs, pratt_parser::PrattParser, Parser};
 
 #[derive(pest_derive::Parser)]
 #[grammar = "grammar.pest"]
