@@ -1,8 +1,5 @@
-use calc_rs;
-use calc_rs::Num;
-use calc_rs::Vars;
+use calc_rs::{Num, Vars};
 use pyo3::prelude::*;
-use pyo3::PyResult;
 use std::collections::HashMap;
 
 #[pyfunction]
