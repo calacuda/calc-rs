@@ -1,4 +1,4 @@
-use crate::{debug, Compile, Node, Operator, Result, Num, Vars};
+use crate::{debug, Compile, Node, Num, Operator, Result, Vars};
 use eyre::bail;
 use regex::Regex;
 
@@ -123,7 +123,7 @@ impl Eval {
                 Operator::Riemann => Ok(self.riemann_sum(lhs, rhs, vars)?),
                 Operator::Negative => unreachable!("negative numbers can only have one operand"),
             },
-            Node::Range(_) => unreachable!("tryed to eval a range which don't get evaluated."),
+            Node::Range(_) => unreachable!("tried to eval a range which don't get evaluated."),
         }
     }
 }
